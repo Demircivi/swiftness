@@ -1,6 +1,8 @@
 # Overview
 Swiftness aims to be an extensive, cross-platform development framework for the MMORPG Silkroad Online. Well tought out interfaces, mostly compatible to existing .NET-interfaces simplify your development process.
 
+Aside from that, the [wiki](https://github.com/florian0/swiftness/wiki) is filled with usefull information all around the game.
+
 # Installation & Use
 
 ## Requirements
@@ -16,7 +18,7 @@ First, clone the repository
 $ git clone <url>
 ```
 Open the project in Monodevelop or Visual Studio and compile it.
-Copy the Dll's to your project-folder and add them as references.
+Copy the Dll to your project-folder and add them as references.
 
 
 # Contribute
@@ -24,13 +26,13 @@ Feel free to send me pull requests through GitHub. I will look into your changes
 If don't want to mess with the insides, you can also contribute by creating bug and feature reports or by extending the wiki with articles.
 
 # Disclaimer & License
-This project has been licensed under the GNU GPLv3. A copy of the license-text should have been shipped along with the code. If not you can find an always up-to-date version at gnu.org - https://www.gnu.org/licenses/gpl-3.0.html.
+This project has been licensed under the GNU GPLv3. A copy of the license-text should [is shipped](https://github.com/florian0/swiftness/blob/master/LICENSE) along with the code. If not you can find an always up-to-date version at gnu.org - https://www.gnu.org/licenses/gpl-3.0.html.
 
 *SILKROAD ONLINE* is a trademark of *Joymax Co., Ltd.*   
 Trademarks belong to their respective owners. All rights reserved. 
 
 # Credits
-Parts of the sourcecode are derived from other tools and guides for Silkroad Online, written by various people. I would like to give them credit to their work. This list aims to be complete, sorry to anyone i've forgotten. ([A list of the contributors](https://github.com/florian0/swiftness/graphs/contributors) is already created and maintained by GitHub)
+Parts of the sourcecode and the wiki-content are derived from other tools and guides for Silkroad Online, written by various people. I would like to give them credit for their work. This list aims to be complete, sorry to anyone i've forgotten. ([A list of the contributors](https://github.com/florian0/swiftness/graphs/contributors) is already created and maintained by GitHub)
 
 * clearscreen
 * jMerlin

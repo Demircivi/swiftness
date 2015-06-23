@@ -35,9 +35,12 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="IO\BinaryReader.cs" />
     <Compile Include="IO\BinaryWriter.cs" />
+    <Compile Include="Security\Cryptography\CRC.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="IO\" />
+    <Folder Include="Security\" />
+    <Folder Include="Security\Cryptography\" />
   </ItemGroup>
 </Project>

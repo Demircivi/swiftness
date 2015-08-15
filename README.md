@@ -6,19 +6,19 @@ Aside from that, the [wiki](https://github.com/florian0/swiftness/wiki) is fille
 # Installation & Use
 
 ## Requirements
-* .NET Framework 3.5 or similar Mono
+* at least .NET Framework 3.5 or similar Mono
 
 ## Install Binaries
-Binaries will be available as soon as the project is public
+Binaries will be available as soon as the project is public.
 
 
 ## Compile from Source
 First, clone the repository
 ```
-$ git clone <url>
+$ git clone https://github.com/florian0/swiftness.git
 ```
 Open the project in Monodevelop or Visual Studio and compile it.
-Copy the Dll to your project-folder and add them as references.
+Copy the Dll to your project-folder and add it as reference.
 
 
 # Contribute
@@ -26,7 +26,7 @@ Feel free to send me pull requests through GitHub. I will look into your changes
 If don't want to mess with the insides, you can also contribute by creating bug and feature reports or by extending the wiki with articles.
 
 # Disclaimer & License
-This project has been licensed under the GNU GPLv3. A copy of the license-text should [is shipped](https://github.com/florian0/swiftness/blob/master/LICENSE) along with the code. If not you can find an always up-to-date version at gnu.org - https://www.gnu.org/licenses/gpl-3.0.html.
+This project has been licensed under the GNU GPLv3. A copy of the license-text [is shipped](https://github.com/florian0/swiftness/blob/master/LICENSE) along with the code. If not you can find an always up-to-date version at gnu.org - https://www.gnu.org/licenses/gpl-3.0.html.
 
 *SILKROAD ONLINE* is a trademark of *Joymax Co., Ltd.*   
 Trademarks belong to their respective owners. All rights reserved. 

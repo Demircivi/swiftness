@@ -43,6 +43,7 @@
     <Compile Include="IO\Graphics\BinaryMaterial.cs" />
     <Compile Include="IO\Graphics\Vector3.cs" />
     <Compile Include="IO\Graphics\Vector4.cs" />
+    <Compile Include="IO\Graphics\BinarySkeleton.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -9,6 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Swiftness</RootNamespace>
     <AssemblyName>Swiftness</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,17 +31,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="IO\BinaryReader.cs" />
     <Compile Include="IO\BinaryWriter.cs" />
     <Compile Include="Security\Cryptography\CRC.cs" />
+    <Compile Include="IO\Graphics\BinaryMaterial.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="IO\" />
     <Folder Include="Security\" />
     <Folder Include="Security\Cryptography\" />
+    <Folder Include="Net\" />
+    <Folder Include="IO\Graphics\" />
   </ItemGroup>
 </Project>

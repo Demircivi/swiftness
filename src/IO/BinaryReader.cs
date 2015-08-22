@@ -8,7 +8,7 @@ namespace Swiftness.IO
 	/// </summary>
 	class BinaryReader : System.IO.BinaryReader
 	{
-		public BinaryReader(System.IO.Stream input) 
+		public BinaryReader(System.IO.Stream input)
 			: base(input) { }
 
 		public BinaryReader(System.IO.Stream input, Encoding encoding)
@@ -41,6 +41,11 @@ namespace Swiftness.IO
 			}
 			
 			return new string(this.ReadChars(len));
+		}
+		
+		public string ReadString (int length)
+		{
+			return new string (this.ReadChars (length));
 		}
 	}
 }

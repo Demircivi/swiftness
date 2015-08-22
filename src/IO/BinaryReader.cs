@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Text;
 
+using Swiftness.IO.Graphics;
+
 namespace Swiftness.IO
 {
 	/// <summary>
@@ -46,6 +48,36 @@ namespace Swiftness.IO
 		public string ReadString (int length)
 		{
 			return new string (this.ReadChars (length));
+		}
+		
+		/// <summary>
+		/// Reads a vector3 from stream
+		/// </summary>
+		/// <returns>
+		/// The vector3.
+		/// </returns>
+		public Vector3 ReadVector3 () {
+			float x = this.ReadSingle();
+			float y = this.ReadSingle();
+			float z = this.ReadSingle();
+			
+			return new Vector3 (x, y, z);
+		}
+		
+		/// <summary>
+		/// Reads a vector4 from stream
+		/// </summary>
+		/// <returns>
+		/// The vector4.
+		/// </returns>
+		public Vector4 ReadVector4 ()
+		{
+			float x = this.ReadSingle ();
+			float y = this.ReadSingle ();
+			float z = this.ReadSingle ();
+			float w = this.ReadSingle();
+			
+			return new Vector4 (w, x, y, z);
 		}
 	}
 }

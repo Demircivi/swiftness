@@ -44,6 +44,10 @@
     <Compile Include="IO\Graphics\Vector3.cs" />
     <Compile Include="IO\Graphics\Vector4.cs" />
     <Compile Include="IO\Graphics\BinarySkeleton.cs" />
+    <Compile Include="Security\Cryptography\Blowfish.cs" />
+    <Compile Include="Security\Cryptography\BlowfishManaged.cs" />
+    <Compile Include="Security\Cryptography\BlowfishTransform.cs" />
+    <Compile Include="Security\Cryptography\BlowfishTransform.Tables.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -157,7 +157,6 @@ namespace Swiftness.Security.Cryptography
 
 			for (int i = 0; i < 16 + 2; i += 2) {
 				Encipher (ref datal, ref datar);
-				Console.WriteLine ("{0:x8}|{1:x8}", datal, datar);
 				PArray [i] = datal;
 				PArray [i + 1] = datar;
 			}
@@ -175,7 +174,6 @@ namespace Swiftness.Security.Cryptography
 		/// <summary>
 		/// This is the basic blowfish encipher method
 		/// </summary>
-		/// <remarks>
 		/// The 16 rounds have been "loop-unrolled" for speed reasons.
 		/// This is valid for C and C++, unsure if it speeds up in C#, too.
 		/// </remarks>
@@ -186,6 +184,7 @@ namespace Swiftness.Security.Cryptography
 			uint xr_copy = xr;
 			
 			xl_copy ^= PArray [0];
+			
 			
 			// Perform 16 rounds of blowfish
 			xr_copy = ROUND (xr_copy, xl_copy, 1);
@@ -214,8 +213,9 @@ namespace Swiftness.Security.Cryptography
 			
 			xr_copy ^= PArray [17];
 			
-			xl = xl_copy;
-			xr = xr_copy;
+			// Twisted for reasons :S
+			xr = xl_copy;
+			xl = xr_copy;
 			
 		}
 		

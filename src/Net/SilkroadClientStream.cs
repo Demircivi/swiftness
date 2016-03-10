@@ -23,6 +23,7 @@ namespace Swiftness.Net
         uint dh_server_secret;
         uint dh_client_secret;
         uint dh_shared_secret;
+        byte[] blowfish_seed;
 
 
 
@@ -85,7 +86,7 @@ namespace Swiftness.Net
             uint seedCount = reader.ReadUInt32();
             uint seedCRC = reader.ReadUInt32();
 
-            byte[] blowfish_seed = reader.ReadBytes(8);
+            blowfish_seed = reader.ReadBytes(8);
 
             uint dh_generator = reader.ReadUInt32();
             uint dh_prime = reader.ReadUInt32();
@@ -142,7 +143,7 @@ namespace Swiftness.Net
 
             #endregion
             
-            // Initialize Blowfish
+            // Initialize Blowfish (temporary)
             encryptor = this.blowfish.CreateEncryptor(blowfish_key, null);
             decryptor = this.blowfish.CreateDecryptor(blowfish_key, null);
 
@@ -205,7 +206,26 @@ namespace Swiftness.Net
                 throw new Exception("Invalid Challenge in Handshake");
             }
 
-            // This packet has no answer
+            // Calculate the final blowfish key
+
+            byte[] final_blowfishkey = new byte[8];
+
+            // Copy the basekey into the array
+            Array.ConstrainedCopy(blowfish_seed, 0, final_blowfishkey, 0, 8);
+
+            // Magic function that mixes everything together
+            KeyTransformValue(
+                ref final_blowfishkey,
+                dh_shared_secret,
+                (byte)0x03);
+
+            // Initialize Blowfish (final)
+            encryptor = this.blowfish.CreateEncryptor(final_blowfishkey, null);
+            decryptor = this.blowfish.CreateDecryptor(final_blowfishkey, null);
+
+            // Send 0x9000 - HANDSHAKE ACCEPT
+
+            this.Write(new Packet(0x9000, false, new byte[0]));
 
         }
 

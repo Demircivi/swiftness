@@ -18,8 +18,8 @@ namespace Swiftness.Net
 	/// </remarks>
 	public interface IPacketStream
 	{
-		Packet Read();
-		void Write(Packet packet);
-		void Flush();
+		Packet Read ();
+		void Write (Packet packet);
+		void Flush ();
 	}
 }

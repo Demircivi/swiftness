@@ -9,16 +9,17 @@ namespace Swiftness.Net
 		// This function was written by jMerlin as part of the article "How to generate the security bytes for SRO"
 		public byte GenerateCountByte ()
 		{
-			byte result = (byte)(count_byte_seeds [2] * (~count_byte_seeds [0] + count_byte_seeds [1]));
+			byte result = (byte)(count_byte_seeds[2] * (~count_byte_seeds[0] + count_byte_seeds[1]));
 			result = (byte)(result ^ (result >> 4));
-			count_byte_seeds [0] = result;
+			count_byte_seeds[0] = result;
 			return result;
 		}
 
 		public Counter (uint seed)
 		{
 			// This function was written by jMerlin as part of the article "How to generate the security bytes for SRO"
-			if (seed == 0) {
+			if (seed == 0)
+			{
 				seed = 0x9ABFB3B6;
 			}
 
@@ -37,9 +38,9 @@ namespace Swiftness.Net
 			if (byte2 == 0)
 				byte2 = 1;
 
-			count_byte_seeds [0] = (byte)(byte1 ^ byte2);
-			count_byte_seeds [1] = byte2;
-			count_byte_seeds [2] = byte1;
+			count_byte_seeds[0] = (byte)(byte1 ^ byte2);
+			count_byte_seeds[1] = byte2;
+			count_byte_seeds[2] = byte1;
 		}
 
 
@@ -55,13 +56,15 @@ namespace Swiftness.Net
 
 			uint part;
 
-			for (int i = 0; i < 32; i++) {
+			for (int i = 0; i < 32; i++)
+			{
 				// Bits 31-1
 				part = val >> 1;        // Bits 30-1
-                
-                if (val % 2 == 1) {
-                    part |= 0x80000000; // Bit 31
-                }
+
+				if (val % 2 == 1)
+				{
+					part |= 0x80000000; // Bit 31
+				}
 
 				part &= 0xFFFFFFFE;
 

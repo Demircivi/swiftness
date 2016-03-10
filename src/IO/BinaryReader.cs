@@ -16,19 +16,43 @@ namespace Swiftness.IO
 		public BinaryReader(System.IO.Stream input, Encoding encoding)
 			: base(input, encoding) { }
 
-		/// <remarks>
-		/// Format: [4 Byte Length][X Byte String]
-		/// Its possible to read empty strings (length == 0)
-		/// </remarks>
-		/// <summary>
-		/// Reads a string from the stream using Joymax-binary-formatting.
-		/// </summary>
-		/// <returns>
-		/// The string.
-		/// </returns>
-		public override string ReadString ()
+
+        /// <remarks>
+        /// Format: [4 Byte Length][X Byte String]
+        /// Its possible to read empty strings (length == 0)
+        /// </remarks>
+        /// <summary>
+        /// Reads a string from the stream using Joymax-binary-formatting.
+        /// </summary>
+        /// <returns>
+        /// The string.
+        /// </returns>
+        public override string ReadString()
+        {
+            return this.ReadString(false);
+        }
+
+        /// <remarks>
+        /// Format: [2/4 Byte Length][X Byte String]
+        /// Its possible to read empty strings (length == 0)
+        /// </remarks>
+        /// <summary>
+        /// Reads a string from the stream using Joymax-binary-formatting.
+        /// </summary>
+        /// <param name="shortLength">Toggle between 2 and 4 byte length</param>
+        /// <returns>The string.</returns>
+		public string ReadString (bool shortLength)
 		{
-			int len = this.ReadInt32 ();
+            int len;
+            // Toggle between 2 and 4 byte length
+            if (shortLength)
+            {
+                len = this.ReadInt16();
+            }
+            else
+            {
+                len = this.ReadInt32();
+            }
 			
 			// Return an empty string, if there is no string to read
 			if (len == 0) {

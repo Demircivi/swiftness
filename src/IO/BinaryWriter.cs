@@ -13,8 +13,13 @@ namespace Swiftness.IO
 			: base (input, encoding)
 		{ }
 
+		public override void Write (string value)
+		{
+			this.Write (value, false);
+		}
+
 		/// <remarks>
-		/// Format: [4 Byte Length][X Byte String]
+		/// Format: [2/4 Byte Length][X Byte String]
 		/// Its possible to write empty strings (length == 0)
 		/// </remarks>
 		/// <summary>
@@ -23,10 +28,18 @@ namespace Swiftness.IO
 		/// <param name='value'>
 		/// The string to be written
 		/// </param>
-		public override void Write (string value)
+		public void Write (string value, bool shortString)
 		{
 			int len = value.Length;
-			this.Write (len);
+
+			if (shortString)
+			{
+				this.Write ((short)len);
+			}
+			else
+			{
+				this.Write (len);
+			}
 
 			for (int i = 0; i < value.Length; i++)
 			{

@@ -14,22 +14,12 @@ namespace Swiftness.Net
 	/// it makes no sense to implement byte[]-based reading or writing.
 	/// 
 	/// This class should only read the absolute base packet:
-	/// [size][opcode][count][crc][payload]
+	/// [size][payload]
 	/// </remarks>
-	public abstract class PacketStream
+	public interface IPacketStream
 	{
-		protected NetworkStream InnerStream {
-			get;
-			private set;
-		}
-		
-		public PacketStream (NetworkStream stream)
-		{
-			this.InnerStream = stream;
-		}
-		
-		public abstract Packet Read();
-		public abstract void Write(Packet packet);
-		public abstract void Flush();
+		Packet Read();
+		void Write(Packet packet);
+		void Flush();
 	}
 }

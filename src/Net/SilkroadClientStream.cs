@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.Sockets;
 
 using System.Linq;
@@ -12,150 +13,206 @@ namespace Swiftness.Net
 {
 	public class SilkroadClientStream : SilkroadStream
 	{
-		public SilkroadClientStream (NetworkStream stream)
+        internal enum HandshakeFlag : byte 
+        {
+            SETUP_NONE = 0x01,
+            SETUP_BLOWFISH = 0x0E,
+            CHALLENGE = 0x10
+        }
+
+        uint dh_server_secret;
+        uint dh_client_secret;
+        uint dh_shared_secret;
+
+
+
+        public SilkroadClientStream (NetworkStream stream)
 			: base(stream)
 		{
 		}
-		
-		public override void Authenticate ()
-		{
-			#region Init
-			
-			Packet p_setup = this.Read ();
-			
-			if (p_setup.OpCode != 0x5000) {
-				throw new Exception (string.Format ("Invalid Opcode in authentication ({0:X4})", p_setup.OpCode));
-			}
-			
-			T_5000 payload = T_5000.TryParse (p_setup.Payload);
-			
-			if (payload.flag != HandshakeFlag.BLOWFISH_HANDSHAKE) {
-				throw new Exception ();
-			}
-			
-			uint dh_server_secret = ((T_5000_E)payload).dh_server_secret;
-			
-			// Initialize CRC
-			this.crc = new Swiftness.Security.Cryptography.CRC ((byte)((T_5000_E)payload).seedCRC);
-			
-			// Initialize Counter
-			this.counter = new Counter ((uint)((T_5000_E)payload).seedCount);
-			
-			
-			#region Diffie Hellmann Keyexchange
-			// Step 1
-			// Server and Client should agree on a modulus P and a base G
-			// In Silkroad, these are predefined by the server.
-			// For now, we trust the server. Checking the numbers to be correct
-			// could be considered but is not really necessary as the keyexchange is
-			// bruteforce-able anyways.
-			
-			// Step 2
-			// Calculate a random secret number.
-			
-			// 0x33 was set by the 0x33.org-community to enable others to 
-			// analyze packets without having to find the client random.
-			uint client_random = 0x33;
-			
-			// Step 3
-			// Calculate the exchangable secret number, where X is our secret number.
-			// A = G ^ X % P
-			uint dh_client_secret = G_pow_X_mod_P (
-				((T_5000_E)payload).dh_generator,
-				client_random, 
-				((T_5000_E)payload).dh_prime);
-			
-			// Step 4
-			// Exchange the secret with the server. Since the server already send us
-			// its secret, we can calculate the shared secret straigt on.
-			// SECRET = G ^ X % P where X is our secret number and G is the exchanged secret
-			uint dh_shared_secret = G_pow_X_mod_P (
-				dh_server_secret,
-                client_random, 
-				((T_5000_E)payload).dh_prime);
-			
-			#endregion
-			
-			#region Calculate the Blowfish Key
-			
-			
-			byte[] blowfish_key = CreateHashThing (
-				dh_server_secret,
+
+        protected override void HandleHandshake(Packet p)
+        {
+            Swiftness.IO.BinaryReader reader = new Swiftness.IO.BinaryReader(p.Payload);
+
+            HandshakeFlag flag = (HandshakeFlag)reader.ReadByte();
+
+            switch(this.AuthenticationState)
+            {
+                case AuthenticationState.CLIENT_WAIT_SETUP:
+                    if (flag != HandshakeFlag.SETUP_BLOWFISH)
+                        throw new AuthenticationException("Got unexpected flag during handshake");
+
+                    HandshakeSetup(reader);
+
+                    break;
+
+                case AuthenticationState.CLIENT_WAIT_CHALLENGE:
+                    if (flag != HandshakeFlag.CHALLENGE)
+                        throw new AuthenticationException("Got unexpected flag during handshake");
+
+                    HandshakeChallenge(reader);
+
+                    break;
+
+
+            }
+
+        }
+
+        private void HandshakeSetup(Swiftness.IO.BinaryReader reader)
+        {
+            /*
+            Length = 0x25 => d37
+            struct TPacket_5000_E {
+                ushort size;
+                ushort opcode;
+                byte securityCount;
+                byte securityCRC;
+            // --------------------
+                byte flag;
+                byte initial_blowfish[8];
+                uint seedCount;
+                uint seedCRC;
+                byte blowfish[8];
+                uint dh_generator;
+                uint dh_prime;
+                uint dh_server_secret;
+            }*/
+
+            reader.ReadBytes(8);
+
+            uint seedCount = reader.ReadUInt32();
+            uint seedCRC = reader.ReadUInt32();
+
+            byte[] blowfish_seed = reader.ReadBytes(8);
+
+            uint dh_generator = reader.ReadUInt32();
+            uint dh_prime = reader.ReadUInt32();
+            dh_server_secret = reader.ReadUInt32();
+
+            this.crc = new CRC((byte)seedCount);
+            this.counter = new Counter(seedCount);
+
+            #region Diffie Hellmann Keyexchange
+            // Step 1
+            // Server and Client should agree on a modulus P and a base G
+            // In Silkroad, these are predefined by the server.
+            // For now, we trust the server. Checking the numbers to be correct
+            // could be considered but is not really necessary as the keyexchange is
+            // bruteforce-able anyways.
+
+            // Step 2
+            // Calculate a random secret number.
+
+            // 0x33 was set by the 0x33.org-community to enable others to 
+            // analyze packets without having to find the client random.
+            uint client_random = 0x33;
+
+
+            // Step 3
+            // Calculate the exchangable secret number, where X is our secret number.
+            // A = G ^ X % P
+            dh_client_secret = G_pow_X_mod_P(
+                dh_generator,
+                client_random,
+                dh_prime);
+
+
+            // Step 4
+            // Exchange the secret with the server. Since the server already send us
+            // its secret, we can calculate the shared secret straigt on.
+            // SECRET = G ^ X % P where X is our secret number and G is the exchanged secret
+            dh_shared_secret = G_pow_X_mod_P(
+                dh_server_secret,
+                client_random,
+                dh_prime);
+
+            #endregion
+
+
+            #region Calculate the Blowfish Key
+
+            byte[] blowfish_key = CreateHashThing(
+                dh_server_secret,
                 dh_client_secret,
-				dh_shared_secret,
-				(byte)(dh_shared_secret & 0x03)
-				);
-			
-			#endregion
-			
-			// Initialize Blowfish
-			encryptor = blowfish.CreateEncryptor (blowfish_key, null);
-			decryptor = blowfish.CreateDecryptor (blowfish_key, null);
-			
-			#region Client Challenge to Server
-			
-			// Encode Challenge to Server
-			byte[] client_challenge_data = CreateHashThing (
-				dh_client_secret,
-				dh_server_secret,
-				dh_shared_secret,
-				(byte)(dh_client_secret & 0x07));
-			
-			byte[] encoded_data = new byte[8];
-			encryptor.TransformBlock (client_challenge_data, 0, 8, encoded_data, 0);
-			
-			// Build the Packet
-			// [Client Secret][Blowfish Data]
-			
-			Packet response = new Packet () {
-				Encrypted = false,
-				OpCode = 0x5000,
-				Payload = new System.IO.MemoryStream()
-			};
-			
-			BinaryWriter writer = new BinaryWriter (response.Payload);
-			writer.Write (dh_client_secret);
-			writer.Write (encoded_data, 0, 8);
-			writer.Flush ();
-			
-			this.Write (response);
-			
-			#endregion
-			
-			#endregion
-			
-			#region Challenge
-			
-			Packet p_challenge = this.Read ();
-			
-			
-			if (p_challenge.OpCode != 0x5000) {
-				throw new Exception (string.Format ("Invalid Opcode in authentication ({0:X4})", p_setup.OpCode));
-			}
-			
-			T_5000 payload_challenge = T_5000.TryParse (p_challenge.Payload);
-			
-			if (payload_challenge.flag != HandshakeFlag.BLOWFISH_CHALLENGE) {
-				throw new Exception ();
-			}
-			
-			#region Calculate Challenge
-			
-            byte[] server_challenge_data = CreateHashThing(dh_server_secret, dh_client_secret, dh_shared_secret, (byte)(dh_server_secret & 0x07));
+                dh_shared_secret,
+                (byte)(dh_shared_secret & 0x03)
+                );
+
+            #endregion
+            
+            // Initialize Blowfish
+            encryptor = this.blowfish.CreateEncryptor(blowfish_key, null);
+            decryptor = this.blowfish.CreateDecryptor(blowfish_key, null);
+
+            #region Calculate Client Challenge
+
+            byte[] client_challenge_data = CreateHashThing(
+                dh_client_secret,
+                dh_server_secret,
+                dh_shared_secret,
+                (byte)(dh_client_secret & 0x07));
+
+
+            byte[] encoded_client_challenge = new byte[8];
+            encryptor.TransformBlock(client_challenge_data, 0, 8, encoded_client_challenge, 0);
+
+            #endregion
+
+
+            MemoryStream ms = new MemoryStream();
+            Swiftness.IO.BinaryWriter writer = new Swiftness.IO.BinaryWriter(ms);
+
+            writer.Write(dh_client_secret);
+            writer.Write(encoded_client_challenge, 0, 8);
+            writer.Flush();
+
+            this.Write(new Packet(0x5000, false, ms.ToArray()));
+        }
+
+        private void HandshakeChallenge(Swiftness.IO.BinaryReader reader)
+        {
+            /*
+            struct TPacket_5000_10 {
+                ushort size;
+                ushort opcode;
+                byte securityCount;
+                byte securityCRC;
+            // --------------------
+                byte flag;
+                byte challenge[8];
+            }
+            */
+
+            byte[] challenge = reader.ReadBytes(8);
+            
+
+            // Calculate the challenge
+            byte[] server_challenge_data = CreateHashThing(
+                dh_server_secret, 
+                dh_client_secret, 
+                dh_shared_secret, 
+                (byte)(dh_server_secret & 0x07));
 
 
             byte[] server_challenge_encoded_data = new byte[8];
             encryptor.TransformBlock(server_challenge_data, 0, 8, server_challenge_encoded_data, 0);
 
-            if ( ! server_challenge_encoded_data.SequenceEqual<byte>(((T_5000_10)payload_challenge).challenge) )
+
+            if (!server_challenge_encoded_data.SequenceEqual<byte>(challenge))
             {
                 throw new Exception("Invalid Challenge in Handshake");
             }
-			
-			#endregion
-			
-			
-			#endregion
+
+            // This packet has no answer
+
+        }
+
+        public override void Authenticate ()
+		{
+            this.AuthenticationState = AuthenticationState.CLIENT_WAIT_SETUP;
+            this.BeginReadLength();
         }
 		
 		internal byte[] CreateHashThing (uint part1, uint part2, uint shared_secret, byte keyByte)

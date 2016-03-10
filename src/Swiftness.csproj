@@ -39,12 +39,15 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="IO\BinaryReader.cs" />
     <Compile Include="IO\BinaryWriter.cs" />
+    <Compile Include="Net\AuthenticationException.cs" />
+    <Compile Include="Net\AuthenticationState.cs" />
     <Compile Include="Net\Counter.cs" />
     <Compile Include="Net\Packet.cs" />
-    <Compile Include="Net\PacketStream.cs" />
+    <Compile Include="Net\IPacketStream.cs" />
     <Compile Include="Net\SilkroadClientStream.cs" />
     <Compile Include="Net\SilkroadStream.cs" />
     <Compile Include="Net\Packet\T_5000.cs" />
+    <Compile Include="PacketStream.cs" />
     <Compile Include="Security\Cryptography\CRC.cs" />
     <Compile Include="IO\Graphics\BinaryMaterial.cs" />
     <Compile Include="IO\Graphics\Vector3.cs" />

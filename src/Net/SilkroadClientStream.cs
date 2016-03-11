@@ -38,27 +38,19 @@ namespace Swiftness.Net
 
 			HandshakeFlag flag = (HandshakeFlag)reader.ReadByte ();
 
-			switch (this.AuthenticationState)
+			switch (flag)
 			{
-				case AuthenticationState.CLIENT_WAIT_SETUP:
-					if (flag != HandshakeFlag.SETUP_BLOWFISH)
-						throw new AuthenticationException ("Got unexpected flag during handshake");
-
+				case HandshakeFlag.SETUP_BLOWFISH:
 					HandshakeSetup (reader);
-
 					break;
 
-				case AuthenticationState.CLIENT_WAIT_CHALLENGE:
-					if (flag != HandshakeFlag.CHALLENGE)
-						throw new AuthenticationException ("Got unexpected flag during handshake");
-
+				case HandshakeFlag.CHALLENGE:
 					HandshakeChallenge (reader);
-
 					break;
 
-
+				default:
+					throw new Exception ("Unknown flag in handshake");
 			}
-
 		}
 
 		private void HandshakeSetup (Swiftness.IO.BinaryReader reader)
@@ -80,6 +72,9 @@ namespace Swiftness.Net
                 uint dh_prime;
                 uint dh_server_secret;
             }*/
+
+			if (this.AuthenticationState != AuthenticationState.CLIENT_WAIT_SETUP)
+				throw new Exception ("Unexpected flag in handshake");
 
 			reader.ReadBytes (8);
 
@@ -189,8 +184,10 @@ namespace Swiftness.Net
             }
             */
 
-			byte[] challenge = reader.ReadBytes (8);
+			if (this.AuthenticationState != AuthenticationState.CLIENT_WAIT_CHALLENGE)
+				throw new Exception ("Unexpected flag in handshake");
 
+			byte[] challenge = reader.ReadBytes (8);
 
 			// Calculate the challenge
 			byte[] server_challenge_data = CreateHashThing (

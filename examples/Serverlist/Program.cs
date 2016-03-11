@@ -7,15 +7,16 @@ namespace Serverlist
 {
 	class Program
 	{
+		static SilkroadClientStream stream;
+
 		static void Main (string[] args)
 		{
 			TcpClient client = new TcpClient ();
-			
-			//client.Connect ("121.128.133.53", 15779);
-			//client.Connect ("5.189.130.227", 15779);
+
+			//client.Connect ("121.128.133.53", 15779); // Official Server: gwgt1.joymax.com bugged!
 			client.Connect ("5.39.47.168", 15779);
 
-			SilkroadClientStream stream = new SilkroadClientStream (client.GetStream ());
+			stream = new SilkroadClientStream (client.GetStream ());
 
 			stream.Authenticate ();
 
@@ -37,11 +38,9 @@ namespace Serverlist
 
 			Console.WriteLine ("Connected to: {0}", name);
 
-
-			Packet version_info = new Packet (0x6101);
-
-			stream.Write (version_info);
-
+			System.Timers.Timer timer = new System.Timers.Timer (5000);
+			timer.Elapsed += Timer_Elapsed;
+			timer.Start ();
 
 			while (true)
 			{
@@ -62,7 +61,7 @@ namespace Serverlist
 						Console.WriteLine ("Realm: 0x{0,2:x} - {1}", realmId, realm_name);
 					}
 
-					
+
 					while (list_reader.ReadByte () == 1)
 					{
 						ushort id = list_reader.ReadUInt16 ();
@@ -77,9 +76,13 @@ namespace Serverlist
 					}
 				}
 			}
+		}
 
+		private static void Timer_Elapsed (object sender, System.Timers.ElapsedEventArgs e)
+		{
+			Packet request_serverlist = new Packet (0x6101);
 
-			Console.Read ();
+			stream.Write (request_serverlist);
 		}
 	}
 }

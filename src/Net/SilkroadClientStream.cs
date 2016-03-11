@@ -92,7 +92,7 @@ namespace Swiftness.Net
 			uint dh_prime = reader.ReadUInt32 ();
 			dh_server_secret = reader.ReadUInt32 ();
 
-			this.crc = new CRC ((byte)seedCount);
+			this.crc = new CRC ((byte)seedCRC);
 			this.counter = new Counter (seedCount);
 
 			#region Diffie Hellmann Keyexchange

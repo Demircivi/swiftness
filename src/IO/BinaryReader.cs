@@ -8,7 +8,7 @@ namespace Swiftness.IO
 	/// <summary>
 	/// A BinaryReader abstraction that reads strings correctly
 	/// </summary>
-	class BinaryReader : System.IO.BinaryReader
+	public class BinaryReader : System.IO.BinaryReader
 	{
 		public BinaryReader (System.IO.Stream input)
 			: base (input)

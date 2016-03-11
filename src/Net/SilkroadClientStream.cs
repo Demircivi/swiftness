@@ -13,6 +13,9 @@ namespace Swiftness.Net
 {
 	public class SilkroadClientStream : SilkroadStream
 	{
+		/// <summary>
+		/// Flags of the Handshake-packet
+		/// </summary>
 		internal enum HandshakeFlag : byte
 		{
 			SETUP_NONE = 0x01,
@@ -20,11 +23,17 @@ namespace Swiftness.Net
 			CHALLENGE = 0x10
 		}
 
-		uint dh_server_secret;
-		uint dh_client_secret;
-		uint dh_shared_secret;
-		byte[] blowfish_seed;
+		/// <summary>
+		/// Required variables for the handshake
+		/// </summary>
+		private uint dh_server_secret;
+		private uint dh_client_secret;
+		private uint dh_shared_secret;
+		private byte[] blowfish_seed;
 
+		/// <summary>
+		/// Signal for syncing Authenticate() until the handshake is done
+		/// </summary>
 		private System.Threading.ManualResetEvent waitHandshake = new System.Threading.ManualResetEvent (false);
 
 		/// <summary>
@@ -39,6 +48,8 @@ namespace Swiftness.Net
 			keepalive.Elapsed += Keepalive_Elapsed;
 		}
 
+
+		#region Authentication and Handshake
 		protected override void HandleHandshake (Packet p)
 		{
 			Swiftness.IO.BinaryReader reader = new Swiftness.IO.BinaryReader (p.Payload);
@@ -260,6 +271,8 @@ namespace Swiftness.Net
 
 			return data;
 		}
+		#endregion
+
 
 		#region Session Keep-alive
 		/// <summary>

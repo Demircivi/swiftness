@@ -27,11 +27,16 @@ namespace Swiftness.Net
 
 		private System.Threading.ManualResetEvent waitHandshake = new System.Threading.ManualResetEvent (false);
 
+		/// <summary>
+		/// Keepalive Timer for repeatetly sending 0x2002
+		/// </summary>
+		private System.Timers.Timer keepalive = new System.Timers.Timer (5000);
 
 
 		public SilkroadClientStream (NetworkStream stream)
 			: base (stream)
 		{
+			keepalive.Elapsed += Keepalive_Elapsed;
 		}
 
 		protected override void HandleHandshake (Packet p)
@@ -160,7 +165,7 @@ namespace Swiftness.Net
 
 			Packet response = new Packet (0x5000);
 
-			
+
 			Swiftness.IO.BinaryWriter writer = new Swiftness.IO.BinaryWriter (response.Payload);
 
 			writer.Write (dh_client_secret);
@@ -239,6 +244,9 @@ namespace Swiftness.Net
 			this.BeginReadLength ();
 
 			waitHandshake.WaitOne ();
+
+			keepalive.Start ();
+
 		}
 
 		internal byte[] CreateHashThing (uint part1, uint part2, uint shared_secret, byte keyByte)
@@ -252,6 +260,36 @@ namespace Swiftness.Net
 
 			return data;
 		}
+
+		#region Session Keep-alive
+		/// <summary>
+		/// Gets or sets the keepalive-interval in milliseconds (default 5000)
+		/// </summary>
+		/// <remarks>This is simply a wrapper around System.Timers.Timer</remarks>
+		public double KeepaliveInterval
+		{
+			get
+			{
+				return keepalive.Interval;
+			}
+			set
+			{
+				keepalive.Interval = value;
+			}
+		}
+
+		/// <summary>
+		/// Callback executed when the timeout elapses
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void Keepalive_Elapsed (object sender, System.Timers.ElapsedEventArgs e)
+		{
+			this.Write (new Packet (0x2002));
+		}
+
+		#endregion
+
 
 
 	}

@@ -25,6 +25,8 @@ namespace Swiftness.Net
 		uint dh_shared_secret;
 		byte[] blowfish_seed;
 
+		private System.Threading.ManualResetEvent waitHandshake = new System.Threading.ManualResetEvent (false);
+
 
 
 		public SilkroadClientStream (NetworkStream stream)
@@ -224,15 +226,19 @@ namespace Swiftness.Net
 			decryptor = this.blowfish.CreateDecryptor (final_blowfishkey, null);
 
 			// Send 0x9000 - HANDSHAKE ACCEPT
-
 			this.Write (new Packet (0x9000, false, new byte[0]));
 
+			this.AuthenticationState = AuthenticationState.DONE;
+
+			waitHandshake.Set ();
 		}
 
 		public override void Authenticate ()
 		{
 			this.AuthenticationState = AuthenticationState.CLIENT_WAIT_SETUP;
 			this.BeginReadLength ();
+
+			waitHandshake.WaitOne ();
 		}
 
 		internal byte[] CreateHashThing (uint part1, uint part2, uint shared_secret, byte keyByte)

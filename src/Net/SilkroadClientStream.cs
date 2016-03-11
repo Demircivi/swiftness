@@ -161,15 +161,18 @@ namespace Swiftness.Net
 
 			#endregion
 
+			Packet response = new Packet (0x5000);
 
-			MemoryStream ms = new MemoryStream ();
-			Swiftness.IO.BinaryWriter writer = new Swiftness.IO.BinaryWriter (ms);
+			
+			Swiftness.IO.BinaryWriter writer = new Swiftness.IO.BinaryWriter (response.Payload);
 
 			writer.Write (dh_client_secret);
 			writer.Write (encoded_client_challenge, 0, 8);
 			writer.Flush ();
 
-			this.Write (new Packet (0x5000, false, ms.ToArray ()));
+			this.AuthenticationState = AuthenticationState.CLIENT_WAIT_CHALLENGE;
+
+			this.Write (response);
 		}
 
 		private void HandshakeChallenge (Swiftness.IO.BinaryReader reader)

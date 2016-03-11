@@ -26,6 +26,13 @@ namespace Swiftness.Net
 			set;
 		}
 
+		public Packet(ushort msgid)
+		{
+			this.MsgId = msgid;
+			this.Encrypted = false;
+			this.Payload = new MemoryStream ();
+		}
+
 		public Packet (ushort msgid, bool encrypted, byte[] data)
 		{
 			this.MsgId = msgid;

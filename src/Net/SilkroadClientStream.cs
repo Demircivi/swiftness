@@ -185,7 +185,7 @@ namespace Swiftness.Net
 
 			this.AuthenticationState = AuthenticationState.CLIENT_WAIT_CHALLENGE;
 
-			this.Write (response);
+			this.InnerWrite (response);
 		}
 
 		private void HandshakeChallenge (Swiftness.IO.BinaryReader reader)
@@ -242,7 +242,7 @@ namespace Swiftness.Net
 			decryptor = this.blowfish.CreateDecryptor (final_blowfishkey, null);
 
 			// Send 0x9000 - HANDSHAKE ACCEPT
-			this.Write (new Packet (0x9000, false, new byte[0]));
+			this.InnerWrite (new Packet (0x9000, false, new byte[0]));
 
 			this.AuthenticationState = AuthenticationState.DONE;
 

@@ -219,7 +219,20 @@ namespace Swiftness.Net
 			return PacketQueue.Dequeue ();
 		}
 
-		public virtual void Write (Packet packet)
+		public virtual void Write(Packet packet)
+		{
+			// Disallow sending packets, when the stream is not authenticated
+			if (this.AuthenticationState != AuthenticationState.DONE)
+				throw new IOException ("Stream not authenticated");
+
+			InnerWrite (packet);
+		}
+
+		/// <summary>
+		/// Internal write function; does not require authentication
+		/// </summary>
+		/// <param name="packet"></param>
+		protected void InnerWrite (Packet packet)
 		{
 			lock (this)
 			{

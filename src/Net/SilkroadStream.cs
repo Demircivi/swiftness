@@ -253,15 +253,6 @@ namespace Swiftness.Net
 				writer.Seek (5, SeekOrigin.Begin);
 				writer.Write (checksum);
 
-
-				Console.WriteLine (
-				"[PacketStream] C->S [{0:X4}][{1:X4}][{2:X2}][{3:X2}]",
-				len,
-				packet.MsgId,
-				checksum,
-				count);
-
-
 				// Write Packet to Stream
 				this.InnerStream.Write (ms.ToArray (), 0, (int)ms.Length);
 			}
